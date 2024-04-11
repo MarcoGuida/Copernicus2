@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copernicus2", "Copernicus2.csproj", "{458A447C-F623-45AF-A94B-2A092DDB3121}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{458A447C-F623-45AF-A94B-2A092DDB3121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{458A447C-F623-45AF-A94B-2A092DDB3121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{458A447C-F623-45AF-A94B-2A092DDB3121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{458A447C-F623-45AF-A94B-2A092DDB3121}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {772CEC13-9839-4655-AB37-2CA00D3DC6F9}
+	EndGlobalSection
+EndGlobal
