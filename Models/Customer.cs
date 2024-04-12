@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Copernicus2.Models
 {
     public partial class Customer
     {
-        public short Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Configurar como autoincremental
+        public int Id { get; set; }
         public string Email { get; set; } = null!;
         public string First { get; set; } = null!;
         public string Last { get; set; } = null!;

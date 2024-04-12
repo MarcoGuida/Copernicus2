@@ -6,7 +6,6 @@ namespace Copernicus2
 
         internal static class Tools
         {
-
             internal static bool IsValidEmail(string email)
             {
                 // Expresión regular para validar el formato de un correo electrónico
@@ -21,8 +20,13 @@ namespace Copernicus2
 
             internal static bool IsValidIso8601DateTime(string dateTimeString)
             {
-                DateTimeOffset result;
-                bool isValid = DateTimeOffset.TryParseExact(
+                if (string.IsNullOrWhiteSpace(dateTimeString))
+                {
+                    return false; // Cadena de fecha y hora vacía o solo espacios en blanco
+                }
+
+                    DateTimeOffset result;
+                    bool isValid = DateTimeOffset.TryParseExact(
                     dateTimeString,
                     "yyyy-MM-ddTHH:mm:ss.fffZ",
                     System.Globalization.CultureInfo.InvariantCulture,
@@ -80,6 +84,11 @@ namespace Copernicus2
 
         internal static string FirstCharToUpper(string text)
         {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
             text = text.ToLower();
             return char.ToUpper(text[0]) + text.Substring(1);
         }

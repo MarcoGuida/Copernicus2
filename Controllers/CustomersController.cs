@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Copernicus2.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,13 +26,12 @@ namespace Copernicus2.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
-            //return await  _context.Customers.FromSqlRaw<Customer>("select * from Customers").ToListAsync();
             return Ok(await _context.Customers.ToListAsync());
         }
 
         // GET api/<CustomersController>/5
         [HttpGet("{id}")]
-        public Customer GetCustomerById(int id)
+        public Customer GetCustomerById([Required] int id)
         {
             try
             {
@@ -44,27 +45,27 @@ namespace Copernicus2.Controllers
         }
 
         [HttpGet("[action]/{email}")]
-        public async Task<ActionResult<List<Customer>>> GetCustomerByEmail(string email)
+        public async Task<ActionResult<List<Customer>>> GetCustomerByEmail([Required]string email)
         {  
                 return Ok(await _context.Customers.Where(a => a.Email.Contains(email)).ToListAsync());//Es un like
         }
 
         [HttpGet("[action]/{first}")]
-        public async Task<ActionResult<List<Customer>>> GetCustomerByFirst(string first)
+        public async Task<ActionResult<List<Customer>>> GetCustomerByFirst([Required] string first)
         {
             
                 return Ok(await _context.Customers.Where(a => a.First.Contains(first)).ToListAsync());//Es un like
         }
 
         [HttpGet("[action]/{Last}")]
-        public async Task<ActionResult<List<Customer>>> GetCustomerByLast(string last)
+        public async Task<ActionResult<List<Customer>>> GetCustomerByLast([Required] string last)
         {
                 return Ok(await _context.Customers.Where(a => a.Last.Contains(last)).ToListAsync());//Es un like
         }
 
         // POST api/<CustomersController>
-        [HttpPost]//Es un insert
-        public IActionResult Post(short id, string email, string first, string last, string company, string CreatedAt, string country)
+        [HttpPost("[action]")]//Es un insert
+        public async Task<IActionResult> PostAsync([EmailAddress] string email, [Required] string first, [Required] string last, [Required] string company, [Required] string CreatedAt, [Required] string country)
         {
             try
             {
@@ -94,12 +95,7 @@ namespace Copernicus2.Controllers
                     return BadRequest("El campo 'Last' no es valido, no tiene que contener ni números ni puntuación");
                 }
 
-                var customer = _context.Customers.Find(id);
-
-                if (customer == null)
-                {
-                    return NoContent(); // Devuelve un código de estado 204 (No Content)    
-                }
+                Customer customer = new Customer();
 
                 customer.Email = email;
                 customer.First = Tools.FirstCharToUpper(first);
@@ -108,33 +104,70 @@ namespace Copernicus2.Controllers
                 customer.CreatedAt = DateTime.Parse(CreatedAt).ToUniversalTime().ToString("u").Replace(" ", "T");//Para convertir en el formato que se está usando en la BBDD
                 customer.Country = Tools.FirstCharToUpper(country);
 
-                _context.SaveChanges();
-                return Ok("Cliente actualizado correctamente");
+                _context.Add(customer);
+                await _context.SaveChangesAsync();
+
+                
+
+                return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+                return StatusCode(500, $"Error interno del servidor: {ex.Message} - {ex.InnerException}");
             }
         }
 
         // PUT api/<CustomersController>/5
         [HttpPut("{id}")]// es un update UPDATE
-        public void Put(short id, string email, string first, string last, string company, string CreatedAt, string country)
+        public async Task<IActionResult> Put([Required] short id,[EmailAddress] string email, [Required] string first, [Required] string last, [Required] string company, [Required] string CreatedAt, [Required] string country)
         {
-            //TODO, EL ID TIENE QUE SER AUTONUMERICO
-            //TODO, PONER VALIDADOR EMAIL Y OTROS VALIDADORES
-            //TODO, REVISAR EL CREATEAT
-            Customer anotherCustomer = new Customer();
-            anotherCustomer.Id = id;
-            anotherCustomer.Email = email;
-            anotherCustomer.First = first;
-            anotherCustomer.Last = last;    
-            anotherCustomer.Company = company;
-            anotherCustomer.CreatedAt = DateTime.Now.ToUniversalTime().ToString("u").Replace(" ", "T");//Para convertir en el formato que se está usando en la BBDD
-            anotherCustomer.Country=country;
+            try
+            {
+                //VALIDADORES
+                if (!Tools.IsValidEmail(email))
+                {
+                    return BadRequest("El campo 'email' no es valido");
+                }
 
-            _context.Customers.Update(anotherCustomer);
-            _context.SaveChanges();
+                if (!Tools.IsValidIso8601DateTime(CreatedAt))
+                {
+                    return BadRequest("El campo 'CreatedAt' no es valido, tiene que ser: yyyy-MM-ddTHH:mm:ss.fffZ");
+                }
+
+                if (!Tools.IsValidCountry(country))
+                {
+                    return BadRequest("El campo 'Country' no es valido, tiene que ser en inglés");
+                }
+
+                if (!Tools.IsValidString(first))
+                {
+                    return BadRequest("El campo 'First' no es valido, no tiene que contener ni números ni puntuación");
+                }
+
+                if (!Tools.IsValidString(last))
+                {
+                    return BadRequest("El campo 'Last' no es valido, no tiene que contener ni números ni puntuación");
+                }
+
+                Customer anotherCustomer = new Customer();
+                anotherCustomer.Id = id;
+                anotherCustomer.Email = email;
+                anotherCustomer.First = Tools.FirstCharToUpper(first);
+                anotherCustomer.Last = Tools.FirstCharToUpper(last);
+                anotherCustomer.Company = company;
+                anotherCustomer.CreatedAt = DateTime.Now.ToUniversalTime().ToString("u").Replace(" ", "T");//Para convertir en el formato que se está usando en la BBDD
+                anotherCustomer.Country = Tools.FirstCharToUpper(country);
+
+                _context.Customers.Update(anotherCustomer);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetCustomer", new { id = anotherCustomer.Id }, anotherCustomer);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message} - {ex.InnerException}");
+            }
         }
 
         // DELETE api/<CustomersController>/5

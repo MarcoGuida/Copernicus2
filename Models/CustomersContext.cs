@@ -32,7 +32,6 @@ namespace Copernicus2.Models
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
                     .HasColumnName("id");
 
                 entity.Property(e => e.Company)
